@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lip.lip.user.dto.request.PatchUserEmailDto;
 import com.lip.lip.user.dto.request.PatchUserNameDto;
+import com.lip.lip.user.dto.request.PatchUserPasswordDto;
 import com.lip.lip.user.dto.request.UserRegisterDto;
 import com.lip.lip.user.dto.response.UserResponseDto;
 import com.lip.lip.user.service.UserService;
@@ -93,6 +94,19 @@ public class UserController {
             @RequestBody @Valid PatchUserEmailDto dto) {
         
         return ResponseEntity.ok(userService.updateEmail(email, dto));
+    }
+
+    @Operation(summary = "Update password", description = "Update user's password identified by email")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Password updated successfully"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @PatchMapping("/password/{email}")
+    public ResponseEntity<UserResponseDto> updateEmail(
+            @PathVariable String email, 
+            @RequestBody @Valid PatchUserPasswordDto password) {
+        
+        return ResponseEntity.ok(userService.updatePassword(email, password));
     }
 
     @Operation(summary = "Delete a user", description = "Delete a user identified by email")
