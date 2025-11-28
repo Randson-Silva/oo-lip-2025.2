@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lip.lip.user.dto.request.PatchUserEmailDto;
 import com.lip.lip.user.dto.request.PatchUserNameDto;
+import com.lip.lip.user.dto.request.PatchUserPasswordDto;
 import com.lip.lip.user.dto.request.UserRegisterDto;
 import com.lip.lip.user.dto.response.UserResponseDto;
 import com.lip.lip.user.entity.User;
@@ -48,7 +49,6 @@ public class UserService {
         
         user.setName(newName.name());
         userRepository.save(user);
-        
         return new UserResponseDto(user);
     }
 
@@ -63,7 +63,15 @@ public class UserService {
 
         user.setEmail(newEmail.email());
         userRepository.save(user);
-        
+        return new UserResponseDto(user);
+    }
+
+    @Transactional
+    public UserResponseDto updatePassword(String email, PatchUserPasswordDto newPassword){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User email not found!"));
+        user.setPassword(newPassword.password());
+        userRepository.save(user);
         return new UserResponseDto(user);
     }
 
