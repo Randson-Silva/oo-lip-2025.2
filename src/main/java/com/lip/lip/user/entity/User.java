@@ -3,14 +3,16 @@ package com.lip.lip.user.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.lip.lip.subject.entity.Subject;
+import com.lip.lip.disicipline.entity.Discipline;
 import com.lip.lip.user.dto.request.UserRegisterDto;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -51,7 +53,8 @@ public class User {
     @Size(min = 3, message = "The password must have a minium of 3 characters.")
     private String password;
 
-    private List<Subject> studyWeekList = null;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Discipline> disciplines;
 
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
