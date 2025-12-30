@@ -47,7 +47,7 @@ public class Subject {
     @Pattern(regexp = "^[A-Za-zÀ-ÖØ-öø-ÿ\\s'-]{2,50}$", message = "The name should contain only letters, spaces, apostrophes, or hyphens.")
     private String theme;
 
-    @Column(name="studyTime")
+    @Column(name="studyTime", nullable=false)
     private LocalDateTime studyTime;
 
     @Column(nullable = true)
