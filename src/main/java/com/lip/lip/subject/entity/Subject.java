@@ -42,6 +42,14 @@ public class Subject {
     @Pattern(regexp = "^[A-Za-zÀ-ÖØ-öø-ÿ\\s'-]{2,50}$", message = "The name should contain only letters, spaces, apostrophes, or hyphens.")
     private String name;
 
+    @Column(name="theme",nullable= false)
+    @Size(max=50, message="The theme must have a maxium of 50 characters.")
+    @Pattern(regexp = "^[A-Za-zÀ-ÖØ-öø-ÿ\\s'-]{2,50}$", message = "The name should contain only letters, spaces, apostrophes, or hyphens.")
+    private String theme;
+
+    @Column(name="studyTime")
+    private LocalDateTime studyTime;
+
     @Column(nullable = true)
     private String color;
 
@@ -69,6 +77,6 @@ public class Subject {
         this.name = subjectRegisterDto.name();
         this.user = user;
         this.color = subjectRegisterDto.color();
-        this.active = true; // always start active
+        this.active = true; 
     }
 }

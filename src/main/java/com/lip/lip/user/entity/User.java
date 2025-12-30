@@ -1,7 +1,9 @@
 package com.lip.lip.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import com.lip.lip.subject.entity.Subject;
 import com.lip.lip.user.dto.request.UserRegisterDto;
 
 import jakarta.persistence.Column;
@@ -48,6 +50,8 @@ public class User {
     @Column(nullable = false)
     @Size(min = 3, message = "The password must have a minium of 3 characters.")
     private String password;
+
+    private List<Subject> studyWeekList = null;
 
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
