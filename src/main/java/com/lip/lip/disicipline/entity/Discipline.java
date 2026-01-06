@@ -2,6 +2,7 @@ package com.lip.lip.disicipline.entity;
 
 import java.time.LocalDateTime;
 
+import com.lip.lip.disicipline.dtos.request.DisciplineRegisterDto;
 import com.lip.lip.user.entity.User;
 
 import jakarta.persistence.Column;
@@ -56,5 +57,12 @@ public class Discipline {
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public Discipline(DisciplineRegisterDto discipline, User user){
+        this.name = discipline.name();
+        this.color = discipline.color();
+        this.user = user;
+        this.active = true;
     }
 }
