@@ -1,65 +1,65 @@
 package com.lip.lip.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
-import com.lip.lip.disicipline.entity.Discipline;
-import com.lip.lip.user.dto.request.UserRegisterDto;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import com.lip.lip.disicipline.entity.Discipline;
+
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class User {
-    
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+public class User implements UserDetails {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    @Size(max = 50, message = "The name must have a maximum of 50 characters.")
-    @Pattern(
-        regexp = "^[A-Za-zÀ-ÖØ-öø-ÿ\\s'-]{2,50}$",
-        message = "The name should contain only letters, spaces, apostrophes, or hyphens."
-    )
+    @Column(nullable = false, unique = true, length = 50)
     private String name;
 
-    @Email(message = "Email is required")
-    @Column(nullable = false, unique = true)
-    @Pattern(
-        regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-        message = "Invalid email format"
-    )
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @Column(nullable = false)
-    @Size(min = 3, message = "The password must have a minium of 3 characters.")
     private String password;
+
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @Column(nullable = false)
+    private boolean verified = false;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
+    private LocalDateTime verificationTokenExpiry;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Discipline> disciplines;
 
-    @Column(name = "createdAt", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updatedAt", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -73,10 +73,35 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public User(UserRegisterDto userRegisterDto) {
-        this.name = userRegisterDto.name();
-        this.email = userRegisterDto.email();
-        this.password = userRegisterDto.password();
+    // UserDetails implementation
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return active;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return active && verified;
     }
 
 }
