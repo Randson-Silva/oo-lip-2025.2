@@ -3,67 +3,61 @@ package com.lip.lip.revision.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
+import com.lip.lip.revision.dto.request.RevisionUpdateRequest;
 import com.lip.lip.revision.dto.response.RevisionResponseDto;
+import com.lip.lip.revision.dto.response.RevisionStatisticsDto;
 import com.lip.lip.revision.service.RevisionService;
+import com.lip.lip.user.entity.User;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
-@Tag(name = "Revision Controller", description = "Endpoints for managing study revisions")
 public class RevisionController {
 
-    private final RevisionService revisionService;
+        private final RevisionService revisionService;
 
-    @Operation(description = "Get all revisions for a user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved all revisions"),
-            @ApiResponse(responseCode = "404", description = "User not found")
-    })
-    @GetMapping
-    public ResponseEntity<List<RevisionResponseDto>> getAllRevisions(
-            @RequestHeader("userId") Long userId) {
+        @GetMapping
+        public ResponseEntity<List<RevisionResponseDto>> getAll(Authentication auth) {
+                User user = (User) auth.getPrincipal();
+                return ResponseEntity.ok(revisionService.getAllRevisions(user.getId()));
+        }
 
-        return ResponseEntity.ok(revisionService.getAllRevisions(userId));
-    }
+        @PatchMapping("/{id}")
+        public ResponseEntity<RevisionResponseDto> updateDate(
+                        @PathVariable Long id,
+                        @RequestBody RevisionUpdateRequest request,
+                        Authentication auth) {
+                User user = (User) auth.getPrincipal();
+                return ResponseEntity.ok(
+                                revisionService.updateRevisionDate(id, user.getId(), request.dueDate()));
+        }
 
-    @Operation(description = "Toggle revision completion status")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Revision status toggled successfully"),
-            @ApiResponse(responseCode = "404", description = "Revision not found")
-    })
-    @PatchMapping("/{id}/toggle")
-    public ResponseEntity<RevisionResponseDto> toggleRevision(
-            @PathVariable Long id,
-            @RequestHeader("userId") Long userId) {
+        @PatchMapping("/{id}/toggle")
+        public ResponseEntity<RevisionResponseDto> toggle(
+                        @PathVariable Long id,
+                        Authentication auth) {
+                User user = (User) auth.getPrincipal();
+                return ResponseEntity.ok(
+                                revisionService.toggleRevision(id, user.getId()));
+        }
 
-        return ResponseEntity.ok(revisionService.toggleRevision(id, userId));
-    }
+        @DeleteMapping("/{id}")
+        public ResponseEntity<Void> delete(
+                        @PathVariable Long id,
+                        Authentication auth) {
+                User user = (User) auth.getPrincipal();
+                revisionService.deleteRevision(id, user.getId());
+                return ResponseEntity.noContent().build();
+        }
 
-    @Operation(description = "Delete a revision")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Revision deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Revision not found")
-    })
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRevision(
-            @PathVariable Long id,
-            @RequestHeader("userId") Long userId) {
-
-        revisionService.deleteRevision(id, userId);
-        return ResponseEntity.noContent().build();
-    }
+        @GetMapping("/statistics")
+        public ResponseEntity<RevisionStatisticsDto> stats(Authentication auth) {
+                User user = (User) auth.getPrincipal();
+                return ResponseEntity.ok(revisionService.getStatistics(user.getId()));
+        }
 }

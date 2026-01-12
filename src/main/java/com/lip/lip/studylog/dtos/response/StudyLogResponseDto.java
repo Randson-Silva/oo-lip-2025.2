@@ -12,15 +12,13 @@ public record StudyLogResponseDto(
         String topic,
         String notes) {
     public StudyLogResponseDto(StudyLog studyLog) {
-        this(   
+        this(
                 studyLog.getId(),
                 String.valueOf(studyLog.getDiscipline().getId()),
                 convertMinutesToTimeFormat(studyLog.getDurationMinutes()),
                 studyLog.getStudyDate(),
                 studyLog.getTheme(),
-                null // notes field doesn't exist in current entity, but keeping for frontend
-                     // compatibility
-        );
+                studyLog.getNotes());
     }
 
     private static String convertMinutesToTimeFormat(Integer minutes) {

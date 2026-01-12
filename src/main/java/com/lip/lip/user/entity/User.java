@@ -56,6 +56,11 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Discipline> disciplines;
 
+    @Column(length = 6)
+    private String resetCode;
+
+    private LocalDateTime resetCodeExpiry;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

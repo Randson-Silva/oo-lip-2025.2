@@ -6,10 +6,15 @@ import lombok.Data;
 
 @Data
 public class ResetPasswordRequest {
-    @NotBlank(message = "Token is required")
-    private String token;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @NotBlank
+    private String email;
+
+    @NotBlank
+    @Size(min = 6, max = 6)
+    private String code;
+
+    @NotBlank
+    @Size(min = 6)
     private String newPassword;
 }

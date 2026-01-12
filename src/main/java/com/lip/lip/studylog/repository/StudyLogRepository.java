@@ -25,4 +25,6 @@ public interface StudyLogRepository extends JpaRepository<StudyLog, Long> {
 
     // Buscar estudo específico de um usuário
     Optional<StudyLog> findByIdAndUserId(Long id, Long userId);
+
+    List<StudyLog> findByUserIdOrderByStudyDateDesc(Long userId);
 }

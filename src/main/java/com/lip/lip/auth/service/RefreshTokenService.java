@@ -13,6 +13,7 @@ import com.lip.lip.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {

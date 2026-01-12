@@ -21,12 +21,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="study_log")
+@Table(name = "study_log")
 @Getter
 @Setter
 @RequiredArgsConstructor
 public class StudyLog {
-    @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -38,12 +39,15 @@ public class StudyLog {
     @Column(nullable = false)
     private LocalDate studyDate;
 
+    @Column(nullable = true)
+    private String notes;
+
     @ManyToOne
-    @JoinColumn(name="discipline_id", nullable = false)
+    @JoinColumn(name = "discipline_id", nullable = false)
     private Discipline discipline;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "created_at", nullable = false, updatable = false)

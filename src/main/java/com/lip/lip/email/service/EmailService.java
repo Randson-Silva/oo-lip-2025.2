@@ -1,6 +1,10 @@
 package com.lip.lip.email.service;
 
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -13,7 +17,7 @@ public class EmailService {
 
     public void sendVerificationEmail(String to, String name, String token) {
         // CORREÇÃO: Usar o endpoint correto do AuthController
-        String verificationLink = "http://localhost:5173/verify-email?token=" + token;
+        String verificationLink = "http://localhost:5173/verificar-email?token=" + token;
 
         String subject = "Confirme seu e-mail - Sistema de Estudos";
 
@@ -71,6 +75,79 @@ public class EmailService {
         message.setText(body);
         message.setFrom("noreply@sistemadeestudos.com");
 
+        mailSender.send(message);
+    }
+
+    public void sendPasswordResetCodeEmail(String to, String name, String code) {
+
+        String subject = "Código de recuperação de senha";
+
+        String body = """
+                Olá %s,
+
+                Recebemos uma solicitação para redefinir sua senha.
+
+                Seu código de recuperação é:
+
+                %s
+
+                Este código expira em 15 minutos.
+
+                Se você não solicitou, ignore este email.
+
+                Atenciosamente,
+                Equipe Sistema de Estudos
+                """
+                .formatted(name, code);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        message.setFrom("noreply@sistemadeestudos.com");
+
+        mailSender.send(message);
+    }
+
+    // Adicione estes métodos ao seu EmailService.java
+
+    public void sendDailyTaskEmail(String to, String name, String tasks) {
+        String subject = "📅 Suas revisões de hoje - " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM"));
+        String body = """
+                Olá %s,
+
+                Hoje é dia de revisar os seguintes tópicos:
+
+                %s
+
+                Mantenha o ritmo! Bons estudos.
+                """.formatted(name, tasks);
+
+        sendSimpleEmail(to, subject, body);
+    }
+
+    public void sendOverdueAlertEmail(String to, String name, String overdueTasks) {
+        String subject = "⚠️ Alerta: Você possui revisões atrasadas";
+        String body = """
+                Olá %s,
+
+                Notamos que você possui revisões pendentes que já passaram do prazo:
+
+                %s
+
+                Tente regularizar seu cronograma para não perder a curva de esquecimento!
+                """.formatted(name, overdueTasks);
+
+        sendSimpleEmail(to, subject, body);
+    }
+
+    // Método privado para evitar repetição de código (boilerplate)
+    private void sendSimpleEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        message.setFrom("noreply@sistemadeestudos.com");
         mailSender.send(message);
     }
 }

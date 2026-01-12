@@ -22,7 +22,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -95,7 +94,7 @@ public class AuthController {
     }
 
     @Operation(description = "Verify email with token")
-    @GetMapping("/verify-email")
+    @GetMapping("/verificar-email")
     public ResponseEntity<MessageResponse> verifyEmail(@RequestParam String token) {
         User user = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid verification token"));
@@ -120,32 +119,46 @@ public class AuthController {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String resetToken = UUID.randomUUID().toString();
-        user.setResetToken(resetToken);
-        user.setResetTokenExpiry(LocalDateTime.now().plusHours(24));
+        String code = String.format("%06d",
+                new java.security.SecureRandom().nextInt(1_000_000));
+
+        user.setResetCode(code);
+        user.setResetCodeExpiry(LocalDateTime.now().plusMinutes(15));
+
         userRepository.save(user);
 
-        // CORREÇÃO: Enviar email de reset
-        emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetToken);
+        emailService.sendPasswordResetCodeEmail(
+                user.getEmail(),
+                user.getName(),
+                code);
 
-        return ResponseEntity.ok(new MessageResponse("Password reset email sent"));
+        return ResponseEntity.ok(
+                new MessageResponse("Código de recuperação enviado para o email"));
     }
 
     @Operation(description = "Reset password with token")
     @PostMapping("/reset-password")
     public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        User user = userRepository.findByResetToken(request.getToken())
-                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Reset token has expired");
+        if (user.getResetCode() == null ||
+                !user.getResetCode().equals(request.getCode())) {
+            throw new RuntimeException("Código inválido");
+        }
+
+        if (user.getResetCodeExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Código expirado");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        user.setResetToken(null);
-        user.setResetTokenExpiry(null);
+        user.setResetCode(null);
+        user.setResetCodeExpiry(null);
+
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("Password reset successfully"));
+        return ResponseEntity.ok(
+                new MessageResponse("Senha redefinida com sucesso"));
+
     }
 }
