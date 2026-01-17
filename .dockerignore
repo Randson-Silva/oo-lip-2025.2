@@ -3,7 +3,5 @@ target
 .idea
 .vscode
 **/*.iml
-Dockerfile
-docker-compose*.yml
 *.log
 node_modules
